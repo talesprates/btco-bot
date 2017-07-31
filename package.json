@@ -1,0 +1,21 @@
+{
+  "name": "btco-bot",
+  "version": "1.0.0",
+  "description": "btco bot for discord app",
+  "main": "btco-bot.js",
+  "keywords": [
+    "btco",
+    "discord",
+    "bot",
+    "chatbot"
+  ],
+  "author": "Tales Prates Correia",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "botkit": "^0.4.10",
+    "discord.js": "^11.1.0",
+    "express": "^4.15.2",
+    "mongoose": "^4.9.3"
+  }
+}
