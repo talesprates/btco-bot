@@ -16,6 +16,8 @@
     "botkit": "^0.4.10",
     "discord.js": "^11.1.0",
     "express": "^4.15.2",
-    "mongoose": "^4.9.3"
+    "mongoose": "^4.9.3",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1"
   }
 }

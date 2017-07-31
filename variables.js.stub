@@ -2,5 +2,9 @@
 // This is a stub for it.
 
 module.exports = {
-  DISCORD_BOT_TOKEN: 'BOT TOKEN'
+  DISCORD_BOT_TOKEN: 'BOT TOKEN',
+ 
+  BF4_SERVER_LIST: [],
+  
+  BFHL_SERVER_LIST: []
 };

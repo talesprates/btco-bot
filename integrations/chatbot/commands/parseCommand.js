@@ -16,15 +16,12 @@ function parse(message, callback) {
     match = message.content.match(command.pattern);
     
     if (match) {
-      const params = [message];
+      const params = [message, callback];
       console.log(match);
-      params.push(...match.slice(1));
-
-      const replyMsg = command.handler(...params);
       
-      console.log('replyMsg', replyMsg);
-
-      callback(replyMsg);
+      params.push(...match.slice(1));
+      command.handler(...params);
+      
       return true;
     } else {
       return false;
