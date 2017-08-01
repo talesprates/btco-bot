@@ -30,9 +30,31 @@ const Maps = require('../../../maps');
         const maxPlayers = serverInfo.slots["2"].max;
         const playersQueue = serverInfo.slots["1"].current;
         const map = getMapName(serverInfo.map);
-        resolve(`${name} ${currentPlayers}/${maxPlayers} (${playersQueue}) | ${map}`);
+        
+        const serverMessage = [];
+        const serverPlayers = parsedBody.message.SERVER_PLAYERS;
+        
+        serverMessage.push(`${name} ${currentPlayers}/${maxPlayers} (${playersQueue}) | ${map}`);
+        generateServerMessage(serverMessage, serverPlayers)
+          .then((serverMessage) => resolve(serverMessage))
+          .catch(() => reject);
       });
     });
+  }
+  
+  function generateServerMessage(serverMessage, serverPlayers) {
+    return new Promise((resolve, reject) => {
+      variables.TRACKED_PLAYERS.forEach((personaId) => {
+        serverPlayers.some((player) => {
+          if (player.personaId == personaId) {
+            serverMessage.push(`\t${player.persona.personaName}`);
+            return true
+          };
+          return false;
+        });
+      });
+      resolve(serverMessage.join('\n'));
+    }); 
   }
   
   function getMapName(name) {
