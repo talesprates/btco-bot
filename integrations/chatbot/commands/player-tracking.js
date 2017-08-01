@@ -5,8 +5,8 @@
   }
 
   module.exports = {
-    pattern: /^!players(?: (.*))?$/,
+    pattern: /^!players$/,
     handler: playerTrack,
-    description: '!players [player-name]'
+    description: '**!players**: shows the tracked playerlist status'
   };
 })();

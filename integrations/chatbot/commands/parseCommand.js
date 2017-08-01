@@ -1,6 +1,6 @@
 const commands = require('./commands');
 
-module.exports = { 
+module.exports = {
   parse
 };
 
@@ -17,7 +17,6 @@ function parse(message, callback) {
     
     if (match) {
       const params = [message, callback];
-      console.log(match);
       
       params.push(...match.slice(1));
       command.handler(...params);

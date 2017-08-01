@@ -1,32 +1,57 @@
 const request = require('request');
 const variables = require('../../../variables');
+const Maps = require('../../../maps');
 
 (() => {
   /* eslint global-require: 0 */
-  function serverTrack(message, callback, serverName) {
-    let replyMsg;
-    const asqd = '3b513dc3-fe79-4c06-8696-4719c4e8a860'
-    request(`http://battlelog.battlefield.com/bf4/servers/show/pc/${asqd}/?json=1`, (error, response) => {
-      if (error) {
-        callback();
-        return;
-      }
-      
-      const parsedBody = JSON.parse(response.body);
-      const serverInfo = parsedBody.message.SERVER_INFO;
-      const name =  serverInfo.name;
-      const currentPlayers = serverInfo.slots["2"].current; 
-      const maxPlayers = serverInfo.slots["2"].max;
-      const playersQueue = serverInfo.slots["1"].current;
-      const map = serverInfo.map;
-      callback(`${name} ${currentPlayers}/${maxPlayers} (${playersQueue}) | ${map}`);
-      return;
+  function serverTrack(message, callback) {
+    const bf4servers = variables.BF4_SERVER_LIST;
+    Promise.all(bf4servers.map(server => getServerStatus(server)))
+      .then((serversInfo) => {
+        callback(serversInfo.join('\n'));
+      })
+      .catch((error) => {
+        callback('error retrieving server info', error);
+      });
+  }
+  
+  function getServerStatus(server) {
+    return new Promise((resolve, reject) => {
+      const {serverId, serverName} = server;
+      request(`http://battlelog.battlefield.com/bf4/servers/show/pc/${serverId}/?json=1`, (error, response) => {
+        const parsedBody = JSON.parse(response.body);
+        if (error || parsedBody.message === 'SERVER_INFO_NOT_FOUND') {
+          reject(error);
+        }
+
+        const serverInfo = parsedBody.message.SERVER_INFO;
+        const name = serverName;
+        const currentPlayers = serverInfo.slots["2"].current; 
+        const maxPlayers = serverInfo.slots["2"].max;
+        const playersQueue = serverInfo.slots["1"].current;
+        const map = getMapName(serverInfo.map);
+        resolve(`${name} ${currentPlayers}/${maxPlayers} (${playersQueue}) | ${map}`);
+      });
     });
+  }
+  
+  function getMapName(name) {
+    let displayName = name;
+    
+    Maps.bf4maps.some((server) => {
+      if (server.raw === name) {
+        displayName = server.displayName;
+        return true;
+      };
+      return false;
+    });
+    
+    return displayName;
   }
 
   module.exports = {
     pattern: /^!servers(?: (.*))?$/,
     handler: serverTrack,
-    description: '!servers [serverName]'
+    description: '**!servers** [bf4|bfhl]: show the tracked serverlist info'
   };
 })();
