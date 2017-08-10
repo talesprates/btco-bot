@@ -1,6 +1,6 @@
 (() => {
   /* eslint global-require: 0 */
-  function help(message, callback, invalidCommand) {
+  function help(message, callback) {
     let helpText = 'commandlist: \n';
     const commands = require('./commands');
 

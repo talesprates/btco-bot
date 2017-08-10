@@ -4,30 +4,29 @@ module.exports = {
   parse
 };
 
- /* eslint global-require: 0 */
 function parse(message, callback) {
   if (message.content.charAt(0) !== '!') {
     return false;
   }
-  
-  const parsed = commands.some((command) => {
-    let match;
 
-    match = message.content.match(command.pattern);
-    
+  const parsed = commands.some((command) => {
+    const match = message.content.match(command.pattern);
+
     if (match) {
       const params = [message, callback];
-      
+
       params.push(...match.slice(1));
       command.handler(...params);
-      
+
       return true;
-    } else {
-      return false;
     }
+
+    return false;
   });
 
   if (!parsed) {
     return false;
   }
+
+  return false;
 }
