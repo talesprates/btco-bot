@@ -1,5 +1,6 @@
 const request = require('request');
 const variables = require('../../../variables');
+// const cheerio = require('cheerio');
 const Maps = require('../../../Maps');
 
 (() => {
@@ -34,7 +35,9 @@ const Maps = require('../../../Maps');
         const serverMessage = [];
         const serverPlayers = parsedBody.message.SERVER_PLAYERS;
 
-        serverMessage.push(`${name} ${currentPlayers}/${maxPlayers} (${playersQueue}) | ${map}`);
+        serverMessage.push(`***[${name.substring(0, 4)}]***`);
+        serverMessage.push(`\t**players:** ${currentPlayers}/${maxPlayers} (${playersQueue})`);
+        serverMessage.push(`\t**map**: ${map}`);
         generateServerMessage(serverMessage, serverPlayers)
           .then(message => resolve(message))
           .catch(() => reject);
@@ -47,7 +50,7 @@ const Maps = require('../../../Maps');
       variables.TRACKED_PLAYERS.forEach((personaId) => {
         serverPlayers.some((player) => {
           if (player.personaId === personaId) {
-            serverMessage.push(`\t${player.persona.personaName}`);
+            serverMessage.push(`\t\t${player.persona.personaName}`);
             return true;
           }
           return false;

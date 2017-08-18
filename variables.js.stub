@@ -2,9 +2,12 @@
 // This is a stub for it.
 
 module.exports = {
-  DISCORD_BOT_TOKEN: 'BOT TOKEN',
- 
-  BF4_SERVER_LIST: [],
-  
-  BFHL_SERVER_LIST: []
+  DISCORD_BOT_TOKEN: 'BOT AUTHENTICATION TOKEN',
+
+  // Use clan tag. max 4 characters
+  BF4_SERVER_LIST: [ { serverId: 'id of the tracked server', serverName: 'server name which will be displayed'} ],
+
+  BFHL_SERVER_LIST: [ { serverId: 'id of the tracked server', serverName: 'server name which will be displayed'} ],
+
+  TRACKED_PLAYERS: [ 'personaId of the tracked player' ]
 };
