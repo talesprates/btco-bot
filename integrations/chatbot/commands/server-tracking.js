@@ -11,7 +11,7 @@ const Maps = require('../../../Maps');
         callback(serversInfo.join('\n'));
       })
       .catch((error) => {
-        callback('error retrieving server info', error);
+        callback(`error retrieving server info (${error})`);
       });
   }
 
@@ -21,25 +21,25 @@ const Maps = require('../../../Maps');
       request(`http://battlelog.battlefield.com/bf4/servers/show/pc/${serverId}/?json=1`, (error, response) => {
         const parsedBody = JSON.parse(response.body);
         if (error || parsedBody.message === 'SERVER_INFO_NOT_FOUND') {
-          reject(error);
+          reject(`${serverId} ${serverName}`);
+        } else {
+          const serverInfo = parsedBody.message.SERVER_INFO;
+          const name = serverName;
+          const currentPlayers = serverInfo.slots['2'].current;
+          const maxPlayers = serverInfo.slots['2'].max;
+          const playersQueue = serverInfo.slots['1'].current;
+          const map = getMapName(serverInfo.map);
+
+          const serverMessage = [];
+          const serverPlayers = parsedBody.message.SERVER_PLAYERS;
+
+          serverMessage.push(`***[${name.substring(0, 4)}]***`);
+          serverMessage.push(`\t**players:** ${currentPlayers}/${maxPlayers} (${playersQueue})`);
+          serverMessage.push(`\t**map**: ${map}`);
+          generateServerMessage(serverMessage, serverPlayers)
+            .then(resolve)
+            .catch(reject);
         }
-
-        const serverInfo = parsedBody.message.SERVER_INFO;
-        const name = serverName;
-        const currentPlayers = serverInfo.slots['2'].current;
-        const maxPlayers = serverInfo.slots['2'].max;
-        const playersQueue = serverInfo.slots['1'].current;
-        const map = getMapName(serverInfo.map);
-
-        const serverMessage = [];
-        const serverPlayers = parsedBody.message.SERVER_PLAYERS;
-
-        serverMessage.push(`***[${name.substring(0, 4)}]***`);
-        serverMessage.push(`\t**players:** ${currentPlayers}/${maxPlayers} (${playersQueue})`);
-        serverMessage.push(`\t**map**: ${map}`);
-        generateServerMessage(serverMessage, serverPlayers)
-          .then(message => resolve(message))
-          .catch(() => reject);
       });
     });
   }
@@ -76,6 +76,6 @@ const Maps = require('../../../Maps');
   module.exports = {
     pattern: /^!servers(?: (.*))?$/,
     handler: serverTrack,
-    description: '**!servers** [bf4|bfhl]: show the tracked serverlist info'
+    description: '**!servers**: show the tracked serverlist info'
   };
 })();
