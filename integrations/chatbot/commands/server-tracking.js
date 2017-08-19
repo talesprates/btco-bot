@@ -1,6 +1,5 @@
 const request = require('request');
 const variables = require('../../../variables');
-// const cheerio = require('cheerio');
 const Maps = require('../../../Maps');
 
 (() => {

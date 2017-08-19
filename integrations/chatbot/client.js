@@ -18,7 +18,7 @@ client.on('message', (msg) => {
   commands.parse(msg, (response) => {
     if (response) {
       client.channels.forEach((channel) => {
-        if (channel.name === 'chat') {
+        if (channel.name === msg.channel.name) {
           console.log('response', response);
           channel.send(response);
         }
