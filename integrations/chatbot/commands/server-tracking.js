@@ -4,15 +4,24 @@ const Maps = require('../../../Maps');
 
 (() => {
   /* eslint global-require: 0 */
-  function serverTrack(message, callback) {
+  function serverTrack(message, callback, link) {
     const bf4servers = variables.BF4_SERVER_LIST;
-    Promise.all(bf4servers.map(server => getServerStatus(server)))
-      .then((serversInfo) => {
-        callback(serversInfo.join('\n'));
-      })
-      .catch((error) => {
-        callback(`error retrieving server info (${error})`);
-      });
+    Promise.all(bf4servers.map((server) => {
+      let serverMessage;
+      if (link === 'link') {
+        serverMessage = getServerLinks(server);
+      } else {
+        serverMessage = getServerStatus(server);
+      }
+
+      return serverMessage;
+    }))
+    .then((serversInfo) => {
+      callback(serversInfo.join('\n'));
+    })
+    .catch((error) => {
+      callback(`error retrieving server info (${error})`);
+    });
   }
 
   function getServerStatus(server) {
@@ -39,6 +48,25 @@ const Maps = require('../../../Maps');
           generateServerMessage(serverMessage, serverPlayers)
             .then(resolve)
             .catch(reject);
+        }
+      });
+    });
+  }
+
+  function getServerLinks(server) {
+    return new Promise((resolve, reject) => {
+      const { serverId, serverName } = server;
+      request(`http://battlelog.battlefield.com/bf4/servers/show/pc/${serverId}/?json=1`, (error, response) => {
+        const parsedBody = JSON.parse(response.body);
+        if (error || parsedBody.message === 'SERVER_INFO_NOT_FOUND') {
+          reject(`${serverId} ${serverName}`);
+        } else {
+          const name = serverName;
+          const serverMessage = [];
+
+          serverMessage.push(`***[${name.substring(0, 4)}]***`);
+          serverMessage.push(`\t**link:** <http://battlelog.battlefield.com/bf4/servers/show/pc/${serverId}/>`);
+          resolve(serverMessage.join('\n'));
         }
       });
     });
