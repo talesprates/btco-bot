@@ -1,19 +1,17 @@
-(() => {
-  /* eslint global-require: 0 */
-  function help(message, callback) {
-    let helpText = 'commandlist: \n';
-    const commands = require('./commands');
+module.exports = {
+  pattern: /^!help$/,
+  handler: help,
+  description: '**!help** : shows a list of valid commands',
+};
 
-    commands.forEach((command) => {
-      helpText += `${command.description}\n`;
-    });
+/* eslint global-require: 0 */
+function help(message, callback) {
+  let helpText = 'commandlist: \n';
+  const commands = require('./commands');
 
-    callback(helpText);
-  }
+  commands.forEach((command) => {
+    helpText += `${command.description}\n`;
+  });
 
-  module.exports = {
-    pattern: /^!help$/,
-    handler: help,
-    description: '**!help** : shows a list of valid commands',
-  };
-})();
+  callback(helpText);
+}
