@@ -12,14 +12,12 @@ module.exports = {
 function serverTrack(message, callback, link) {
   const bf4servers = variables.BF4_SERVER_LIST;
   Promise.all(bf4servers.map((server) => {
-    let serverMessage;
     if (link === 'link') {
-      serverMessage = getServerLinks(server);
-    } else {
-      serverMessage = getServerStatus(server);
+      return getServerLinks(server);
     }
 
-    return serverMessage;
+    return getServerStatus(server)
+      .then(serverStatus => generateServerMessage(serverStatus));
   }))
   .then(serversInfo => callback(serversInfo.join('\n')))
   .catch(error => callback(`error retrieving server info (${error})`));
@@ -53,32 +51,81 @@ function getServerStatus(server) {
         reject(`${serverId} ${serverName}`);
       } else {
         const serverInfo = parsedBody.message.SERVER_INFO;
-        const name = serverName;
-        const currentPlayers = serverInfo.slots['2'].current;
-        const maxPlayers = serverInfo.slots['2'].max;
-        const playersQueue = serverInfo.slots['1'].current;
-        const map = getMapName(serverInfo.map);
-
-        const serverMessage = [];
-        const serverPlayers = parsedBody.message.SERVER_PLAYERS;
-
-        serverMessage.push(`***[${name.substring(0, 4)}]***`);
-        serverMessage.push(`\t**players:** ${currentPlayers}/${maxPlayers} (${playersQueue})`);
-        serverMessage.push(`\t**map**: ${map}`);
-        generateServerMessage(serverMessage, serverPlayers)
-          .then(resolve)
+        const serverStatus =
+          {
+            name: serverName,
+            currentPlayers: serverInfo.slots['2'].current,
+            maxPlayers: serverInfo.slots['2'].max,
+            playersQueue: serverInfo.slots['1'].current,
+            map: getMapName(serverInfo.map)
+          };
+        getPlayersStatus(server)
+          .then((playersStatus) => {
+            serverStatus.playersStatus = playersStatus;
+            resolve(serverStatus);
+          })
           .catch(reject);
       }
     });
   });
 }
 
-function generateServerMessage(serverMessage, serverPlayers) {
+function getPlayersStatus(server) {
+  const { serverId, serverName } = server;
+  return new Promise((resolve, reject) => {
+    request(`http://keeper.battlelog.com/snapshot/${serverId}`, (error, response) => {
+      const parsedBody = JSON.parse(response.body);
+      if (error || parsedBody === 'No such game') {
+        reject(`${serverId} ${serverName}`);
+      } else {
+        const serverSnapshot = parsedBody.snapshot;
+        const alphaTeamTickets = serverSnapshot.conquest['1'].tickets;
+        const bravoTeamTickets = serverSnapshot.conquest['2'].tickets;
+        const maxTickets = serverSnapshot.conquest['1'].ticketsMax;
+        const alphaTeamPlayers = [];
+        const bravoTeamPlayers = [];
+        Object.keys(serverSnapshot.teamInfo['1'].players).forEach((personaId) => {
+          const player = serverSnapshot.teamInfo['1'].players[personaId];
+          player.personaId = personaId;
+          alphaTeamPlayers.push(player);
+        });
+        Object.keys(serverSnapshot.teamInfo['2'].players).forEach((personaId) => {
+          const player = serverSnapshot.teamInfo['2'].players[personaId];
+          player.personaId = personaId;
+          bravoTeamPlayers.push(player);
+        });
+        const playersStatus =
+          {
+            alphaTeam: { tickets: alphaTeamTickets, players: alphaTeamPlayers },
+            bravoTeam: { tickets: bravoTeamTickets, players: bravoTeamPlayers },
+            maxTickets,
+          };
+        resolve(playersStatus);
+      }
+    });
+  });
+}
+
+function generateServerMessage(serverStatus) {
   return new Promise((resolve) => {
+    const serverMessage = [];
+    const { name, currentPlayers, maxPlayers, playersQueue, map } = serverStatus;
+    const alphaTeam = serverStatus.playersStatus.alphaTeam;
+    const bravoTeam = serverStatus.playersStatus.bravoTeam;
+    const maxTickets = serverStatus.playersStatus.maxTickets;
+    serverMessage.push(`***[${name.substring(0, 4)}]***`);
+    serverMessage.push(`\t**players:** ${currentPlayers}/${maxPlayers} (${playersQueue})`);
+    serverMessage.push(`\t**map**: ${map}`);
+    serverMessage.push(`\t**tickets**: ${alphaTeam.tickets}/${bravoTeam.tickets}/${maxTickets}`);
+    const serverPlayers = alphaTeam.players.concat(bravoTeam.players);
     variables.TRACKED_PLAYERS.forEach((personaId) => {
       serverPlayers.some((player) => {
         if (player.personaId === personaId) {
-          serverMessage.push(`\t\t${player.persona.personaName}`);
+          if (player.tag.length) {
+            serverMessage.push(`\t\t[${player.tag}] ${player.name}`);
+          } else {
+            serverMessage.push(`\t\t${player.name}`);
+          }
           return true;
         }
         return false;
