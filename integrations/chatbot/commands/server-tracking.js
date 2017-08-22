@@ -79,31 +79,37 @@ function getPlayersStatus(server) {
         reject(`${serverId} ${serverName}`);
       } else {
         const serverSnapshot = parsedBody.snapshot;
-        const alphaTeamTickets = serverSnapshot.conquest['1'].tickets || 0;
-        const bravoTeamTickets = serverSnapshot.conquest['2'].ticket || 0;
         const maxTickets = serverSnapshot.conquest['1'].ticketsMax || 0;
-        const alphaTeamPlayers = [];
-        const bravoTeamPlayers = [];
-        Object.keys(serverSnapshot.teamInfo['1'].players).forEach((personaId) => {
-          const player = serverSnapshot.teamInfo['1'].players[personaId];
-          player.personaId = personaId;
-          alphaTeamPlayers.push(player);
-        });
-        Object.keys(serverSnapshot.teamInfo['2'].players).forEach((personaId) => {
-          const player = serverSnapshot.teamInfo['2'].players[personaId];
-          player.personaId = personaId;
-          bravoTeamPlayers.push(player);
-        });
+        const alphaTeam = getServerTeam(serverSnapshot, '1');
+        const bravoTeam = getServerTeam(serverSnapshot, '2');
+
         const playersStatus =
           {
-            alphaTeam: { tickets: alphaTeamTickets, players: alphaTeamPlayers },
-            bravoTeam: { tickets: bravoTeamTickets, players: bravoTeamPlayers },
+            alphaTeam,
+            bravoTeam,
             maxTickets,
           };
         resolve(playersStatus);
       }
     });
   });
+}
+
+function getServerTeam(serverSnapshot, team) {
+  const teamPlayers = [];
+  const teamTickets = serverSnapshot.conquest[team].tickets || 0;
+  const playersInfo = serverSnapshot.teamInfo[team].players;
+
+  Object.keys(playersInfo).forEach((personaId) => {
+    const player = playersInfo[personaId];
+    player.personaId = personaId;
+    teamPlayers.push(player);
+  });
+
+  return {
+    tickets: teamTickets,
+    players: teamPlayers
+  };
 }
 
 function generateServerMessage(serverStatus) {
@@ -113,11 +119,13 @@ function generateServerMessage(serverStatus) {
     const alphaTeam = serverStatus.playersStatus.alphaTeam;
     const bravoTeam = serverStatus.playersStatus.bravoTeam;
     const maxTickets = serverStatus.playersStatus.maxTickets;
+    const serverPlayers = alphaTeam.players.concat(bravoTeam.players);
+
     serverMessage.push(`***[${name.substring(0, 4)}]***`);
     serverMessage.push(`\t**players:** ${currentPlayers}/${maxPlayers} (${playersQueue})`);
     serverMessage.push(`\t**map**: ${map}`);
     serverMessage.push(`\t**tickets**: ${alphaTeam.tickets}/${bravoTeam.tickets}/${maxTickets}`);
-    const serverPlayers = alphaTeam.players.concat(bravoTeam.players);
+
     variables.TRACKED_PLAYERS.forEach((personaId) => {
       serverPlayers.some((player) => {
         if (player.personaId === personaId) {
