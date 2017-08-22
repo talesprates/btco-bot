@@ -79,9 +79,9 @@ function getPlayersStatus(server) {
         reject(`${serverId} ${serverName}`);
       } else {
         const serverSnapshot = parsedBody.snapshot;
-        const alphaTeamTickets = serverSnapshot.conquest['1'].tickets;
-        const bravoTeamTickets = serverSnapshot.conquest['2'].tickets;
-        const maxTickets = serverSnapshot.conquest['1'].ticketsMax;
+        const alphaTeamTickets = serverSnapshot.conquest['1'].tickets || 0;
+        const bravoTeamTickets = serverSnapshot.conquest['2'].ticket || 0;
+        const maxTickets = serverSnapshot.conquest['1'].ticketsMax || 0;
         const alphaTeamPlayers = [];
         const bravoTeamPlayers = [];
         Object.keys(serverSnapshot.teamInfo['1'].players).forEach((personaId) => {
