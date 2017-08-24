@@ -86,7 +86,7 @@ function getPlayersStatus(server) {
           {
             alphaTeam,
             bravoTeam,
-            maxTickets: alphaTeam.maxTickets,
+            maxTickets: alphaTeam.ticketsMax,
           };
         resolve(playersStatus);
       }
