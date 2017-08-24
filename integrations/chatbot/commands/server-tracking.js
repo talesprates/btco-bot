@@ -79,7 +79,6 @@ function getPlayersStatus(server) {
         reject(`${serverId} ${serverName}`);
       } else {
         const serverSnapshot = parsedBody.snapshot;
-        const maxTickets = serverSnapshot.conquest['1'].ticketsMax || 0;
         const alphaTeam = getServerTeam(serverSnapshot, '1');
         const bravoTeam = getServerTeam(serverSnapshot, '2');
 
@@ -87,7 +86,7 @@ function getPlayersStatus(server) {
           {
             alphaTeam,
             bravoTeam,
-            maxTickets,
+            maxTickets: alphaTeam.maxTickets,
           };
         resolve(playersStatus);
       }
@@ -96,19 +95,30 @@ function getPlayersStatus(server) {
 }
 
 function getServerTeam(serverSnapshot, team) {
-  const teamPlayers = [];
-  const teamTickets = serverSnapshot.conquest[team].tickets || 0;
-  const playersInfo = serverSnapshot.teamInfo[team].players;
+  const { conquest, teamInfo } = serverSnapshot;
+  const players = [];
+  const playersInfo = teamInfo[team].players;
+  let tickets;
+  let ticketsMax;
+
+  if (conquest) {
+    tickets = conquest[team].tickets;
+    ticketsMax = conquest[team].ticketsMax;
+  } else {
+    tickets = 0;
+    ticketsMax = 0;
+  }
 
   Object.keys(playersInfo).forEach((personaId) => {
     const player = playersInfo[personaId];
     player.personaId = personaId;
-    teamPlayers.push(player);
+    players.push(player);
   });
 
   return {
-    tickets: teamTickets,
-    players: teamPlayers
+    tickets,
+    ticketsMax,
+    players
   };
 }
 
