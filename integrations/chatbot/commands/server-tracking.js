@@ -20,10 +20,7 @@ function getMessage(server) {
     serverInfo.getServerStatus(server)
       .then((serverStatus) => {
         serverSnapshot.getServerTeams(server)
-          .then((serverTeams) => {
-            console.log(serverStatus, serverTeams);
-            resolve(generateServerMessage(serverStatus, serverTeams));
-          });
+          .then(serverTeams => resolve(generateServerMessage(serverStatus, serverTeams)));
       });
   });
 }
@@ -34,7 +31,7 @@ function generateServerMessage(serverStatus, serverTeams) {
     const { name, currentPlayers, maxPlayers, playersQueue, map } = serverStatus;
     const { alphaTeam, bravoTeam, ticketsMax } = serverTeams;
     const serverPlayers = alphaTeam.players.concat(bravoTeam.players)
-    .sort((playerA, playerB) => playerB.tag.localeCompare(playerA.tag));
+      .sort((playerA, playerB) => playerB.tag.localeCompare(playerA.tag));
 
     serverMessage.push(`***[${name.substring(0, 4)}]***`);
     serverMessage.push(`\t**players:** ${currentPlayers}/${maxPlayers} (${playersQueue})`);
@@ -44,11 +41,7 @@ function generateServerMessage(serverStatus, serverTeams) {
     variables.TRACKED_PLAYERS.forEach((personaId) => {
       serverPlayers.some((player) => {
         if (player.personaId === personaId) {
-          if (player.tag.length) {
-            serverMessage.push(`\t\t[${player.tag}] ${player.name}`);
-          } else {
-            serverMessage.push(`\t\t${player.name}`);
-          }
+          serverMessage.push(player.tag.length ? `\t\t[${player.tag}] ${player.name}` : `\t\t${player.name}`);
           return true;
         }
         return false;

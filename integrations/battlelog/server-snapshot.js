@@ -41,16 +41,8 @@ function getServerTeam(serverSnapshot, team) {
   const { conquest, teamInfo } = serverSnapshot;
   const players = [];
   const playersInfo = teamInfo[team].players;
-  let tickets;
-  let ticketsMax;
-
-  if (conquest) {
-    tickets = conquest[team].tickets;
-    ticketsMax = conquest[team].ticketsMax;
-  } else {
-    tickets = 0;
-    ticketsMax = 0;
-  }
+  const tickets = conquest ? conquest[team].tickets : 0;
+  const ticketsMax = conquest ? conquest[team].ticketsMax : 0;
 
   Object.keys(playersInfo).forEach((personaId) => {
     const player = playersInfo[personaId];
