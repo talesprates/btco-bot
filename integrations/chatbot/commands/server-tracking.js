@@ -1,12 +1,12 @@
 const variables = require('../../../variables');
-const serverInfo = require('../../battlelog/server-info');
-const serverSnapshot = require('../../battlelog/server-snapshot');
+const { serverInfo, serverSnapshot } = require('../../battlelog');
 
 module.exports = {
   pattern: /^!servers(?: (.*))?$/,
   handler: serverTrack,
   description: '**!servers** [link]: show the tracked serverlist info or link'
 };
+
 
 function serverTrack(message, callback) {
   const bf4servers = variables.BF4_SERVER_LIST;
