@@ -62,10 +62,9 @@ function generateServerMessage(playersWeapons) {
       .sort((playerA, playerB) => playerB.weapon.kills - playerA.weapon.kills);
 
     sortedPlayersWeapons.forEach((player, index) => {
-      serverMessage.push(`${index + 1}. **${player.name}** *${player.weapon.slug.toUpperCase()}* - **${player.weapon.kills}** (*${player.weapon.accuracy.toFixed(2)}%*)`);
+      serverMessage.push(`${index + 1}. **${player.name}**\n\t*${player.weapon.slug.toUpperCase()}* - **${player.weapon.kills}** (*${player.weapon.accuracy.toFixed(2)}%*)`);
     });
 
     resolve(serverMessage);
   });
 }
-
