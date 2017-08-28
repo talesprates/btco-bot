@@ -4,7 +4,7 @@ const { overview, persona } = require('../../battlelog/');
 module.exports = {
   pattern: /^!overview(?: (.*))?$/,
   handler: overviewTrack,
-  description: '**!weapon** [gun]: show the tracked players weapon kills'
+  description: '**!overview**: show the tracked players overview stats'
 };
 
 function overviewTrack(message, callback) {
@@ -12,10 +12,14 @@ function overviewTrack(message, callback) {
   Promise.all(trackedPlayers.map(personaId => getOverview(personaId)))
     .then(generateServerMessage)
     .then(serverMessage => callback(serverMessage.join('\n')))
-    .catch(error => callback(`error retrieving weapon info (${error})`));
+    .catch(error => callback(`error retrieving player overview (${error})`));
 }
 
 function getOverview(personaId) {
+  return typeof (personaId) === 'string' ? getSingleOverview(personaId) : getMultipleOverviews(personaId);
+}
+
+function getSingleOverview(personaId) {
   return new Promise((resolve, reject) => {
     persona.getPersona(personaId)
       .then((playerPersona) => {
@@ -23,28 +27,47 @@ function getOverview(personaId) {
           .then(overviewData => resolve(
             {
               name: playerPersona.personaName,
-              overview: overviewData
+              skill: overviewData.overviewStats.skill,
+              kdRatio: overviewData.overviewStats.kdRatio,
+              timePlayed: overviewData.overviewStats.timePlayed
             }))
           .catch(reject);
       });
   });
 }
 
+function getMultipleOverviews(personaList) {
+  return new Promise((resolve, reject) =>
+    Promise.all(personaList.map(getSingleOverview))
+      .then((overviewList) => {
+        const reducedPersonaList = overviewList.reduce((p1, p2) => {
+          p2.name = p1.name;
+          p2.skill = p1.skill;
+          p2.timePlayed += p1.timePlayed;
+          p2.kdRatio += p1.kdRatio;
+          return p2;
+        });
+        reducedPersonaList.kdRatio /= overviewList.length;
+        resolve(reducedPersonaList);
+      })
+      .catch(reject)
+  );
+}
+
 function generateServerMessage(overviewsData) {
   return new Promise((resolve) => {
-    const serverMessage = [];
     const sortedPlayersOverviews = overviewsData
-      .sort((playerA, playerB) =>
-        playerB.overview.overviewStats.skill - playerA.overview.overviewStats.skill);
+      .sort((playerA, playerB) => playerB.skill - playerA.skill);
 
-    sortedPlayersOverviews.forEach((player, index) => {
-      const name = player.name;
-      const overviewStats = player.overview.overviewStats;
-      const time = `${Math.floor(overviewStats.timePlayed / 3600, 0)}h`;
-      serverMessage.push(`${index + 1}. **${name}**`);
-      serverMessage.push(`\t**skill**: ${overviewStats.skill} - **kd** ${overviewStats.kdRatio} **time** ${time}`);
-    });
+    Promise.all(sortedPlayersOverviews.map(getOverviewMessage))
+      .then(resolve);
+  });
+}
 
-    resolve(serverMessage);
+function getOverviewMessage(player, index) {
+  return new Promise((resolve) => {
+    const { name, skill, kdRatio, timePlayed } = player;
+    const time = `${Math.floor(timePlayed / 3600, 0)}h`;
+    resolve(`${index + 1}. **${name}**\n\t**skill:**: ${skill} - **kd:** ${kdRatio.toFixed(2)} **time:** ${time}`);
   });
 }
