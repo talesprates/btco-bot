@@ -25,10 +25,14 @@ function getMultipleVehicles(personaList, wheels) {
       .then((vehicleList) => {
         const reducedVehicleList = vehicleList.reduce((v1, v2) => {
           v2.name = v1.name;
-          v2.vehicle = v2.vehicle.map((v, index) => {
-            v.kills += v1.vehicle[index].kills;
-            return v;
-          });
+          if (!wheels) {
+            v2.vehicle = v2.vehicle.map((v, index) => {
+              v.kills += v1.vehicle[index].kills;
+              return v;
+            });
+          } else {
+            v2.vehicle.kills += v1.vehicle.kills;
+          }
           return v2;
         });
         resolve(reducedVehicleList);
@@ -76,7 +80,6 @@ function findVehicle(vehicles, wheels) {
 }
 
 function generateServerMessage(playersVehicles, wheels) {
-  console.log(playersVehicles);
   return new Promise((resolve) => {
     const serverMessage = [];
 
