@@ -1,9 +1,13 @@
 const request = require('request');
 const overview = require('./overview');
+const Persona = require('./models/Persona');
 
 module.exports = {
   getPersona
 };
+
+const BATTLEFIELD4 = '2048';
+const PC = '1';
 
 function getPersona(personaId) {
   return new Promise((resolve, reject) => {
@@ -16,17 +20,16 @@ function getPersona(personaId) {
           } else {
             let playerPersona;
             parsedBody.data.soldiersBox.some((soldier) => {
-              if (soldier.persona.personaId === personaId) {
+              if (soldier.game === BATTLEFIELD4 && soldier.platform === PC) {
                 playerPersona = soldier.persona;
                 return true;
               }
               return false;
             });
-            resolve(playerPersona);
+            resolve(new Persona(playerPersona));
           }
         });
       })
       .catch(reject);
   });
 }
-
