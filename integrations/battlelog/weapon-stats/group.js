@@ -16,11 +16,10 @@ function getAllWeapons(personaList) {
 }
 
 function reduceAllWeapons(wl1, wl2) {
-  const reducedList = {};
-  Object.keys(wl1).forEach((key) => {
+  return Object.keys(wl1).reduce((reducedList, key) => {
     reducedList[key] = wl2[key] ? Weapon.add(wl1[key], wl2[key]) : wl1[key];
-  });
-  return reducedList;
+    return reducedList;
+  }, {});
 }
 
 function getSingleWeapon(personaList, weaponSlug) {

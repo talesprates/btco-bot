@@ -1,8 +1,6 @@
 const { weaponStats, persona } = require('../../battlelog/');
 const { TRACKED_PLAYERS } = require('../../../variables');
 
-const WEAPONS = 0;
-const PERSONAS = 1;
 const TOPWEAPON = 0;
 
 module.exports = {
@@ -22,23 +20,18 @@ function weaponTrack(message, callback, weaponSlug) {
     .catch(callback);
 }
 
-function generateResponseMessage(promises) {
+function generateResponseMessage([weapons, personas]) {
   return new Promise((resolve) => {
-    const weapons = promises[WEAPONS];
-    const personas = promises[PERSONAS];
-    const serverMessage = [];
-
-    weapons.map((weapon, index) => {
+    const serverMessage = weapons.map((weapon, index) => {
       const playerPersona = personas[index];
-      const sortedWeapons = Object.keys(weapon).map(key => weapon[key])
+      const sortedWeapons = Object.values(weapon)
         .sort((weapon1, weapon2) => weapon2.kills - weapon1.kills);
       return { weapon: sortedWeapons[TOPWEAPON], persona: playerPersona };
     }).sort((player1, player2) => player2.weapon.kills - player1.weapon.kills)
-      .forEach((player, index) => {
+      .map((player, index) => {
         const accuracy = player.weapon.shotsHit / player.weapon.shotsFired;
-        serverMessage.push(`${index + 1}. **${player.persona.personaName}**`);
-        serverMessage.push(`\t*${player.weapon.slug.toUpperCase()}* - **${player.weapon.kills}** (*${accuracy.toFixed(2)}%*)`);
+        return `${index + 1}. **${player.persona.personaName}**\n\t*${player.weapon.slug.toUpperCase()}* - **${player.weapon.kills}** (*${accuracy.toFixed(2)}%*)`;
       });
-    resolve(serverMessage.join('\n'));
+    resolve(serverMessage);
   });
 }

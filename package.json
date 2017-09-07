@@ -12,6 +12,7 @@
   "author": "Tales Prates Correia",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.16.2",
     "body-parser": "^1.17.1",
     "botkit": "^0.4.10",
     "cheerio": "^1.0.0-rc.2",
