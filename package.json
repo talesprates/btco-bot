@@ -20,7 +20,8 @@
     "express": "^4.15.2",
     "mongoose": "^4.9.3",
     "request": "^2.81.0",
-    "request-promise": "^4.2.1"
+    "request-promise": "^4.2.1",
+    "jasmine-spec-reporter": "^4.2.1"
   },
   "devDependencies": {
     "eslint": "^3.19.0",
@@ -28,6 +29,7 @@
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-promise": "^3.5.0",
-    "eslint-plugin-standard": "^3.0.1"
+    "eslint-plugin-standard": "^3.0.1",
+    "jasmine": "^2.8.0"
   }
 }

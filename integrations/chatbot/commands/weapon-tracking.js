@@ -29,7 +29,7 @@ function generateResponseMessage([weapons, personas]) {
       return { weapon: sortedWeapons[TOPWEAPON], persona: playerPersona };
     }).sort((player1, player2) => player2.weapon.kills - player1.weapon.kills)
       .map((player, index) => {
-        const accuracy = player.weapon.shotsHit / player.weapon.shotsFired;
+        const accuracy = player.weapon.shotsHit / player.weapon.shotsFired || 0;
         return `${index + 1}. **${player.persona.personaName}**\n\t*${player.weapon.slug.toUpperCase()}* - **${player.weapon.kills}** (*${accuracy.toFixed(2)}%*)`;
       });
     resolve(serverMessage);
