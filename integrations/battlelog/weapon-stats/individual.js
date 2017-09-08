@@ -13,11 +13,10 @@ function getAllWeapons(personaId) {
       if (error) {
         reject(personaId);
       } else {
-        const weaponList = {};
-        parsedBody.data.mainWeaponStats.forEach((weapon) => {
+        resolve(parsedBody.data.mainWeaponStats.reduce((weaponList, weapon) => {
           weaponList[weapon.slug] = new Weapon(weapon);
-        });
-        resolve(weaponList);
+          return weaponList;
+        }, {}));
       }
     });
   });

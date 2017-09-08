@@ -23,14 +23,13 @@ function weaponTrack(message, callback, weaponSlug) {
 function generateResponseMessage([weapons, personas]) {
   return new Promise((resolve) => {
     const serverMessage = weapons.map((weapon, index) => {
-      const playerPersona = personas[index];
       const sortedWeapons = Object.values(weapon)
         .sort((weapon1, weapon2) => weapon2.kills - weapon1.kills);
-      return { weapon: sortedWeapons[TOPWEAPON], persona: playerPersona };
+      return { weapon: sortedWeapons[TOPWEAPON], persona: personas[index] };
     }).sort((player1, player2) => player2.weapon.kills - player1.weapon.kills)
-      .map((player, index) => {
-        const accuracy = player.weapon.shotsHit / player.weapon.shotsFired || 0;
-        return `${index + 1}. **${player.persona.personaName}**\n\t*${player.weapon.slug.toUpperCase()}* - **${player.weapon.kills}** (*${accuracy.toFixed(2)}%*)`;
+      .map(({ weapon, persona: soldier }, index) => {
+        const accuracy = weapon.shotsHit / weapon.shotsFired || 0;
+        return `${index + 1}. **${soldier.personaName}**\n\t*${weapon.slug.toUpperCase()}* - **${weapon.kills}** (*${accuracy.toFixed(2)}%*)`;
       });
     resolve(serverMessage);
   });
