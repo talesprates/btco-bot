@@ -1,5 +1,5 @@
 const request = require('request');
-const Overview = require('./models/Overview');
+const Overview = require('../models/Overview');
 
 module.exports = {
   getOverview

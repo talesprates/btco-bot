@@ -3,6 +3,6 @@ module.exports = [
   // require('./server-tracking'),
   require('./weapon-tracking'),
   require('./vehicle-tracking'),
-  // require('./overview-tracking'),
+  require('./overview-tracking'),
   require('./help')
 ];
