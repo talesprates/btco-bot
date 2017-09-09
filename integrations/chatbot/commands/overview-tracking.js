@@ -27,7 +27,7 @@ function generateServerMessage([overviews, personas]) {
       .map((player, index) => {
         const { skill, kdRatio, timePlayed } = player.overview;
         const time = `${Math.floor(timePlayed / 3600, 0)}h`;
-        return `${index + 1}. **${player.persona.name}**\n\t**skill:**: ${skill} - **kd:** ${kdRatio.toFixed(2)} **time:** ${time}`;
+        return `${index + 1}. **${player.persona.personaName}**\n\t**skill:**: ${skill} - **kd:** ${kdRatio.toFixed(2)} **time:** ${time}`;
       });
     resolve(serverMessage);
   });

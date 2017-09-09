@@ -12,7 +12,9 @@ function getOverview(personaId) {
       if (error || parsedBody.data.statsTemplate === 'profile.statsinternalerror') {
         reject(personaId);
       } else {
-        resolve(new Overview(parsedBody.data));
+        const overview = parsedBody.data.overviewStats;
+        overview.currentUserId = parsedBody.data.currentUserId;
+        resolve(new Overview(overview));
       }
     });
   });
