@@ -10,12 +10,12 @@ module.exports = {
 
 function serverTrack(message, callback) {
   Promise.all(BF4_SERVER_LIST.map(serverSnapshot.getServerSnapshot))
-    .then(snapshots => generateServerMessage(snapshots, BF4_SERVER_LIST))
+    .then(snapshots => generateResponseMessage(snapshots, BF4_SERVER_LIST))
     .then(callback)
     .catch(error => callback(`error retrieving server info (${error})`));
 }
 
-function generateServerMessage(snapshots, servers) {
+function generateResponseMessage(snapshots, servers) {
   return new Promise((resolve) => {
     const serverMessage = snapshots.map((snapshot, index) => {
       const [alphaTeam, bravoTeam] = snapshot.teamInfo;

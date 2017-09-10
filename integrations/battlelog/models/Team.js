@@ -2,7 +2,6 @@ const Player = require('./Player');
 
 module.exports = class Team {
   constructor(team, tickets) {
-    console.log(tickets.tickets, tickets.ticketsMax);
     this.tickets = tickets.tickets || 0;
     this.ticketsMax = tickets.ticketsMax || 0;
     this.faction = team.faction;

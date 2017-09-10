@@ -13,12 +13,12 @@ function overviewTrack(message, callback) {
       Promise.all(TRACKED_PLAYERS.map(overview.getOverview)),
       Promise.all(TRACKED_PLAYERS.map(persona.getPersona))
     ])
-    .then(generateServerMessage)
+    .then(generateResponseMessage)
     .then(callback)
     .catch(error => callback(`error retrieving player overview (${error})`));
 }
 
-function generateServerMessage([overviews, personas]) {
+function generateResponseMessage([overviews, personas]) {
   return new Promise((resolve) => {
     const serverMessage = overviews.map((personaOverview, index) => {
       const resultOverview = { overview: overviews[index], persona: personas[index] };
