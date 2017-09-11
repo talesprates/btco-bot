@@ -1,5 +1,5 @@
-const variables = require('../../../variables');
-const { serverInfo, serverSnapshot } = require('../../battlelog');
+const { BF4_SERVER_LIST, TRACKED_PLAYERS } = require('../../../variables');
+const { serverSnapshot } = require('../../battlelog');
 
 module.exports = {
   pattern: /^!servers(?: (.*))?$/,
@@ -9,44 +9,32 @@ module.exports = {
 
 
 function serverTrack(message, callback) {
-  const bf4servers = variables.BF4_SERVER_LIST;
-  Promise.all(bf4servers.map(server => getMessage(server)))
-    .then(serverMessage => callback(serverMessage.join('\n')))
+  Promise.all(BF4_SERVER_LIST.map(serverSnapshot.getServerSnapshot))
+    .then(snapshots => generateResponseMessage(snapshots, BF4_SERVER_LIST))
+    .then(callback)
     .catch(error => callback(`error retrieving server info (${error})`));
 }
 
-function getMessage(server) {
+function generateResponseMessage(snapshots, servers) {
   return new Promise((resolve) => {
-    serverInfo.getServerStatus(server)
-      .then((serverStatus) => {
-        serverSnapshot.getServerTeams(server)
-          .then(serverTeams => resolve(generateServerMessage(serverStatus, serverTeams)));
-      });
-  });
-}
+    const serverMessage = snapshots.map((snapshot, index) => {
+      const [alphaTeam, bravoTeam] = snapshot.teamInfo;
 
-function generateServerMessage(serverStatus, serverTeams) {
-  return new Promise((resolve) => {
-    const serverMessage = [];
-    const { name, currentPlayers, maxPlayers, playersQueue, map } = serverStatus;
-    const { alphaTeam, bravoTeam, ticketsMax } = serverTeams;
-    const serverPlayers = alphaTeam.players.concat(bravoTeam.players)
-      .sort((playerA, playerB) => playerB.tag.localeCompare(playerA.tag));
+      let message = `***[${servers[index].serverName.substring(0, 4)}]***`;
+      message += `\n\t**players:** ${snapshot.getOnlinePlayers()}/${snapshot.maxPlayers} (${snapshot.waitingPlayers})`;
+      message += `\n\t**map**: ${snapshot.getMapName()}`;
+      message += `\n\t**tickets**: ${alphaTeam.getFlag()} ${alphaTeam.tickets}/${bravoTeam.tickets} ${bravoTeam.getFlag()}`;
+      message += `\n\t**total tickets**: ${bravoTeam.ticketsMax}`;
 
-    serverMessage.push(`***[${name.substring(0, 4)}]***`);
-    serverMessage.push(`\t**players:** ${currentPlayers}/${maxPlayers} (${playersQueue})`);
-    serverMessage.push(`\t**map**: ${map}`);
-    serverMessage.push(`\t**tickets**: ${alphaTeam.tickets}/${bravoTeam.tickets}/${ticketsMax}`);
-
-    variables.TRACKED_PLAYERS.forEach((personaId) => {
-      serverPlayers.some((player) => {
-        if (player.personaId === personaId) {
-          serverMessage.push(player.tag.length ? `\t\t[${player.tag}] ${player.name}` : `\t\t${player.name}`);
-          return true;
+      TRACKED_PLAYERS.forEach((personaId) => {
+        if (alphaTeam.players[personaId] || bravoTeam.players[personaId]) {
+          const player = alphaTeam.players[personaId] || bravoTeam.players[personaId];
+          message += player.tag.length ? `\n\t\t[${player.tag}] ${player.name}` : `\n\t\t${player.name}`;
         }
-        return false;
       });
+      return message;
     });
-    resolve(serverMessage.join('\n'));
+
+    resolve(serverMessage);
   });
 }
