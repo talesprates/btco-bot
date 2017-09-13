@@ -4,7 +4,7 @@ const { vehicleStats, persona } = require('../../battlelog/');
 module.exports = {
   pattern: /^!vehicle(?: (.*))?$/,
   handler: vehicleTrack,
-  description: '**!vehicle** [wheels]: show the tracked players vehicle kills'
+  description: '**!vehicle** [slug]: show the tracked players vehicle kills'
 };
 
 const TOPVEHICLE = 0;

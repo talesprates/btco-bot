@@ -6,15 +6,19 @@ const TOPWEAPON = 0;
 module.exports = {
   pattern: /^!weapon(?: (.*))?$/,
   handler: weaponTrack,
-  description: '**!weapon** [gun]: show the tracked players weapon kills'
+  description: '**!weapon** [slug]: show the tracked players weapon kills'
 };
 
-function weaponTrack(message, callback, weaponSlug) {
-  Promise.all(
-    [
-      Promise.all(TRACKED_PLAYERS.map(personaId => weaponStats.getWeapons(personaId, weaponSlug))),
-      Promise.all(TRACKED_PLAYERS.map(persona.getPersona))
-    ])
+function weaponTrack(message, callback, weapon) {
+  weaponStats.isValidWeapon(weapon)
+    .then((weaponSlug) => {
+      Promise.all(
+        [
+          Promise.all(TRACKED_PLAYERS.map(personaId =>
+            weaponStats.getWeapons(personaId, weaponSlug))),
+          Promise.all(TRACKED_PLAYERS.map(persona.getPersona))
+        ]);
+    })
     .then(generateResponseMessage)
     .then(callback)
     .catch(callback);

@@ -4,7 +4,7 @@ const { serverSnapshot } = require('../../battlelog');
 module.exports = {
   pattern: /^!servers(?: (.*))?$/,
   handler: serverTrack,
-  description: '**!servers** [link]: show the tracked serverlist info or link'
+  description: '**!servers**: show the tracked serverlist info or link'
 };
 
 
