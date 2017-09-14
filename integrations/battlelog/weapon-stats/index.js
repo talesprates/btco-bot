@@ -19,7 +19,7 @@ function isValidWeapon(slug) {
   return new Promise((resolve, reject) => {
     let gunStats;
     const found = bf4weapons.some((weapon) => {
-      if (weapon.replace(/-/g, ' ').toUpperCase().indexOf(slug.toUpperCase()) !== -1) {
+      if (weapon.toUpperCase().indexOf(slug.toUpperCase()) !== -1) {
         gunStats = weapon;
         return true;
       }

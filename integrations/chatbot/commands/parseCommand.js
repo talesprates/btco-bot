@@ -25,6 +25,7 @@ function parse(message, callback) {
   });
 
   if (!parsed) {
+    callback('invalid command. type **!help** for the command list');
     return false;
   }
 

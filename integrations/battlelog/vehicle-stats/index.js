@@ -19,7 +19,7 @@ function isValidVehicle(slug) {
   return new Promise((resolve, reject) => {
     let gunStats;
     const found = bf4vehicles.some((vehicle) => {
-      if (vehicle.replace(/-/g, ' ').toUpperCase().indexOf(slug.toUpperCase()) !== -1) {
+      if (vehicle.toUpperCase().indexOf(slug.toUpperCase()) !== -1) {
         gunStats = vehicle;
         return true;
       }

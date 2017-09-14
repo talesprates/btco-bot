@@ -9,13 +9,15 @@ module.exports = {
 
 const TOPVEHICLE = 0;
 
-function vehicleTrack(message, callback, vehicleSlug) {
-  Promise.all(
-    [
-      Promise.all(TRACKED_PLAYERS.map(personaId =>
-        vehicleStats.getVehicles(personaId, vehicleSlug))),
-      Promise.all(TRACKED_PLAYERS.map(persona.getPersona))
-    ])
+function vehicleTrack(message, callback, vehicle) {
+  vehicleStats.isValidVehicle(vehicle)
+    .then(vehicleSlug => Promise.all(
+      [
+        Promise.all(TRACKED_PLAYERS.map(personaId =>
+          vehicleStats.getVehicles(personaId, vehicleSlug))),
+        Promise.all(TRACKED_PLAYERS.map(persona.getPersona))
+      ]
+    ))
     .then(generateResponseMessage)
     .then(callback)
     .catch(callback);
